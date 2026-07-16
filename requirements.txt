@@ -1,0 +1,26 @@
+# ============================================================
+#  requirements.txt
+#
+#  CHÚ Ý: KHÔNG cài torch và onnxruntime-gpu bằng lệnh -r thường,
+#  vì chúng cần đúng phiên bản CUDA cho RTX 5070. Làm theo README:
+#
+#   1) PyTorch CUDA 12.8:
+#      pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+#
+#   2) onnxruntime-gpu bản CUDA 12 (PHẢI cùng CUDA 12 với torch, nếu lệch
+#      phiên bản CUDA thì insightface và YOLO tranh nhau cuDNN -> hỏng mặt):
+#      pip install onnxruntime-gpu --index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/
+#
+#   3) Rồi mới: pip install -r requirements.txt
+# ============================================================
+
+ultralytics>=8.3.0          # YOLO11 (phát hiện người + cháy)
+insightface>=1.0.0          # nhận diện khuôn mặt
+opencv-python>=4.9.0        # đọc video, vẽ khung
+PyYAML>=6.0                 # đọc config.yaml
+requests>=2.30              # gửi thông báo ntfy/telegram
+dill>=0.3.8                 # cần để load models/fire.pt (model cháy cộng đồng)
+# torch, torchvision, onnxruntime-gpu: cài riêng ở bước 1 & 2 bên trên
+lap>=0.5.12                 # ByteTrack (theo dõi người) cần
+flask>=3.0                  # dashboard web
+imageio-ffmpeg>=0.5         # nén video H.264 để phát trên trình duyệt

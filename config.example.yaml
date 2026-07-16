@@ -1,0 +1,146 @@
+# ============================================================
+#  config.yaml — Chỉnh mọi thứ ở đây, KHÔNG cần sửa code.
+# ============================================================
+
+# --- NGUỒN VIDEO ---
+# Đổi 1 dòng này để chuyển webcam <-> file <-> camera IP:
+#   0                                         -> webcam laptop
+#   "test_fire.mp4"                           -> file video
+#   "rtsp://user:pass@192.168.1.100:554/..."  -> camera IP (khi có)
+video:
+  source: 0
+  width: 1280          # để trống (null) nếu muốn giữ độ phân giải gốc
+  height: 720
+  reconnect: true      # tự kết nối lại nếu camera IP rớt mạng
+
+# --- HIỂN THỊ ---
+display:
+  show_window: true    # false nếu chạy nền không cần cửa sổ
+  show_fps: true
+
+# --- CẢNH BÁO (phân tầng thông minh, chống spam) ---
+# 3 tầng: KHẨN (cháy, người lạ ở lì, người khi vắng nhà) = nhắn ngay + ghi hình;
+#         CHÚ Ý (người lạ thoáng qua) = nhắn 1 lần mỗi lượt;
+#         NHẬT KÝ (người quen, vật) = chỉ lưu ảnh, KHÔNG nhắn.
+alert:
+  save_dir: "data/alerts"
+  mode: "home"         # chế độ lúc khởi động: home (ở nhà) | away (vắng) | sleep (ngủ)
+                       # đổi nhanh bằng phím trên cửa sổ video: O = ở nhà, V = vắng, N = ngủ
+  session_gap: 300     # vắng bao lâu (giây) thì lần xuất hiện sau tính là "lượt mới"
+  urgent_repeat: 30    # sự kiện khẩn còn tiếp diễn thì nhắc lại mỗi 30 giây
+  sleep_hours: [23, 6] # đang ở home mà trong khung giờ này -> tự coi là chế độ ngủ (null = tắt)
+  fire_review_dir: "data/fire_review"  # ảnh gốc mỗi lần báo cháy (nguyên liệu sửa báo nhầm)
+
+# --- VÙNG GIÁM SÁT (vẽ bằng: python zone_editor.py) ---
+zones:
+  enabled: true
+  file: "data/zones.json"
+  whole_frame_if_empty: true   # chưa vẽ vùng -> cả khung hình là 1 vùng "toan-khung"
+  anchor: "center"     # điểm xét trong/ngoài vùng: "center" = giữa người (webcam bàn,
+                       # chỉ thấy nửa người); "bottom" = chân (camera nhìn toàn thân)
+
+# --- ĐẾM GIỜ NGƯỜI LẠ TRONG VÙNG ---
+dwell:
+  enabled: true
+  seconds: 10          # người lạ ở trong vùng quá số giây này -> báo + ghi hình
+  grace: 2.0           # rời vùng quá số giây này thì tính lại từ đầu
+
+# --- GHI HÌNH SỰ KIỆN ---
+recording:
+  enabled: true
+  dir: "data/recordings"
+  pre_roll: 5          # ghi kèm số giây TRƯỚC khi sự kiện xảy ra
+  post_roll: 5         # người lạ đi rồi vẫn ghi thêm số giây này
+  max_seconds: 60      # trần độ dài 1 video (chống đầy ổ)
+  fps: 15
+
+# --- THÔNG BÁO ĐIỆN THOẠI (bật được NHIỀU kênh cùng lúc) ---
+notify:
+  channels: ["zalo"]   # chỉ dùng Zalo; muốn thêm lại ntfy: ["zalo", "ntfy"]
+  timeout: 5           # giây, tránh treo nếu mạng chậm
+  ntfy:
+    server: "https://ntfy.sh"
+    topic: "DOI-TEN-BI-MAT-KHO-DOAN"   # <-- tu dat ten topic rieng   # <-- tên topic BÍ MẬT của bạn, subscribe đúng cái này trên app ntfy
+  telegram:            # tạo bot qua @BotFather trên Telegram
+    token: ""          # <-- dien token cua ban
+    chat_id: ""        # <-- dien chat_id (chay: python zalo_setup.py <token>)
+  zalo:                # tạo bot: app Zalo -> OA "Zalo Bot Manager" -> Create bot
+    token: ""          # <-- dien token cua ban          # token nhận qua tin nhắn Zalo sau khi tạo bot
+    chat_id: ""        # <-- dien chat_id (chay: python zalo_setup.py <token>)        # lấy bằng: python zalo_setup.py <token>
+    api_base: "https://bot-api.zaloplatforms.com"
+    send_photo: true   # gửi kèm ảnh (ảnh đi qua host tạm ntfy.sh, tự xoá ~3h;
+                       # cần giữ ntfy.topic ở trên dù không dùng app ntfy)
+
+# --- CÁC SKILL (bật/tắt & tinh chỉnh từng cái) ---
+skills:
+
+  person:
+    enabled: true
+    model: "yolo11n.pt"     # n(nhẹ) < s < m < l < x (nặng/chính xác hơn)
+    conf: 0.4
+    device: "auto"          # auto = tự chọn GPU/CPU theo máy; ép cứng: 0 hoặc "cpu"
+    alert_when_person: false  # true = có người là báo (chế độ nhà đang khoá)
+    interval: 1             # chạy mỗi khung (khung cam mượt theo người)
+
+  face:
+    enabled: true
+    faces_dir: "data/faces"
+    threshold: 0.5          # cao hơn = khắt khe hơn khi nhận là người nhà
+    det_size: [640, 640]
+    ctx_id: "auto"          # auto = tự chọn GPU/CPU theo máy
+    alert_on_stranger: true # báo khi thấy người lạ
+    alert_on_known: true    # báo cả khi thấy người quen (bạn yêu cầu)
+    interval: 3             # nhận diện mặt mỗi 3 khung (thấy người lạ nhanh hơn)
+
+  fire:
+    enabled: true
+    model: "models/fire.pt" # model cộng đồng (mfranzon/fire-smoke-yolov8), lớp: fire/smoke
+    conf: 0.4               # 0.4 = cân bằng; cao hơn ít báo nhầm, thấp hơn nhạy hơn
+    device: "auto"
+    min_streak: 2           # 2 lần liên tiếp thấy lửa là báo (~0.3-0.5s; tăng lên 3 nếu hay báo nhầm)
+    interval: 3             # dò cháy mỗi 3 khung (phản ứng nhanh hơn)
+
+  fire_small:
+    enabled: true
+    model: "models/fire_small.pt"  # model cộng đồng — chuyên lửa NHỎ (bật lửa, nến, bếp)
+    conf: 0.5
+    device: "auto"
+    min_streak: 2
+    interval: 3
+    alert_labels: ["fire"]  # model này hay nhìn TÓC ĐEN thành "smoke" -> chỉ cho báo lửa;
+                            # khói thật đã có model fire (D-Fire) xịn hơn lo
+    # LƯU Ý: nến sinh nhật / bếp ga cũng có thể kích hoạt. Nếu phiền:
+    # tăng conf lên 0.6-0.7, hoặc tắt hẳn (enabled: false).
+
+  object:
+    enabled: true
+    model: "yolo11n.pt"     # dùng CHUNG model với person (không tốn thêm VRAM)
+    conf: 0.45
+    device: "auto"
+    interval: 3             # quét vật mỗi 3 khung
+    classes: [15, 16, 2, 3, 1]   # mèo, chó, ô tô, xe máy, xe đạp (mã lớp COCO)
+    alert_classes: []       # muốn báo điện thoại khi thấy gì thì thêm, vd: ["cho", "meo"]
+
+# --- NHIỀU CAMERA (bỏ dấu # để dùng; khi có mục 'cameras' thì mục 'video' bị bỏ qua) ---
+# Mỗi cam: vùng giám sát + đếm giờ + ghi hình RIÊNG; model AI dùng chung cho nhẹ GPU.
+# Vẽ vùng cho từng cam: python zone_editor.py --image <ảnh chụp từ cam đó>
+#cameras:
+#  - name: "cong"
+#    source: "rtsp://user:pass@192.168.1.100:554/stream2"   # stream2 = bản nhẹ, hợp AI
+#    zones_file: "data/zones_cong.json"
+#  - name: "phong-khach"
+#    source: 0                                              # webcam
+#    zones_file: "data/zones_phong.json"
+
+# --- DASHBOARD WEB (xem trên trình duyệt máy tính / điện thoại cùng WiFi) ---
+dashboard:
+  enabled: true
+  host: "0.0.0.0"      # 0.0.0.0 = điện thoại cùng WiFi vào xem được
+  port: 8090           # mở:  http://localhost:8090
+  password: ""         # đặt mật khẩu nếu WiFi có người lạ dùng chung (trống = không hỏi)
+
+# --- TỰ DỌN DUNG LƯỢNG (ảnh cảnh báo + video sự kiện; KHÔNG đụng ảnh người nhà) ---
+storage:
+  enabled: true
+  max_days: 14         # xoá file cũ hơn số ngày này
+  max_gb: 10           # tổng vượt số GB này thì xoá dần từ cũ nhất

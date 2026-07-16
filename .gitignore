@@ -1,0 +1,26 @@
+# cong cu ho tro dev ca nhan - khong push
+.claude/
+
+# ===== TUYỆT ĐỐI KHÔNG PUSH =====
+# config thật chứa TOKEN Zalo/Telegram + topic ntfy bí mật -> dùng config.example.yaml
+config.yaml
+
+# dữ liệu cá nhân: ảnh khuôn mặt người nhà, ảnh/video cảnh báo, vùng nhà bạn
+data/
+
+# ===== Môi trường & rác =====
+.venv/
+__pycache__/
+*.pyc
+*.log
+_*.py
+_*.txt
+_*.jpg
+_*.mp4
+
+# ===== Model & dataset (nặng, tải/train lại được — xem README) =====
+*.pt
+models/
+datasets/
+runs/
+runs_fire/
