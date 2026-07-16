@@ -1,6 +1,3 @@
-# cong cu ho tro dev ca nhan - khong push
-.claude/
-
 # ===== TUYỆT ĐỐI KHÔNG PUSH =====
 # config thật chứa TOKEN Zalo/Telegram + topic ntfy bí mật -> dùng config.example.yaml
 config.yaml
